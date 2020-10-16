@@ -1,73 +1,7 @@
-library("NetworkDistance")
-library("corrplot")
-library("VisuNet")
-library("reshape2")
-library("ggplot2")
-library("ggpubr")
 
-### balance rules ### ASD groups
-rls_min <- min(table(newModel$decision))
-Md_l1 <- list()
-Md_l2 <- list()
-Md_l3 <- list()
-Md_l4 <- list()
-Md_l5 <- list()
-Md_l6 <- list()
-
-for(i in 1:20){
-  set.seed(i)
-pddnos_n <- sample(which(as.character(newModel$decision)=="PDD-NOS"), rls_min)
-asperg_n <- sample(which(as.character(newModel$decision)=="ASPERGER'S DISORDER"), rls_min)
-autism_n <- sample(which(as.character(newModel$decision)=="AUTISM"), rls_min)
-control_n <- sample(which(as.character(newModel$decision)=="CONTROL"), rls_min)
-newModel2 <- newModel[c(pddnos_n, asperg_n, autism_n, control_n), ]
-
-net0 <- network_gen(newModel2, decision="PDD-NOS", ruleSet = 'own', NodeColor = 'DL', Param = 'Min Cov', minValue=0, minAcc=0.25, type = 'RDF', topN = 100) 
-net1 <- network_gen(newModel2, decision="ASPERGER'S DISORDER", ruleSet = 'own', NodeColor = 'DL', Param = 'Min Cov', minValue=0, minAcc=0.25, type = 'RDF', topN = 100) 
-net2 <- network_gen(newModel2, decision="AUTISM", ruleSet = 'own', NodeColor = 'DL', Param = 'Min Cov', minValue=0, minAcc=0.25, type = 'RDF', topN = 100) 
-net3 <- network_gen(newModel2, decision="CONTROL", ruleSet = 'own', NodeColor = 'DL', Param = 'Min Cov', minValue=0, minAcc=0.25, type = 'RDF', topN = 100) 
-
-vis_out <- list(net0[[1]], net1[[1]], net2[[1]], net3[[1]])
-names(vis_out) <- c("PDD-NOS", "ASPERGER'S DISORDER", "AUTISM", "CONTROL")
-#vis_out <- visunet(newModel2, type = "RDF")
-
-#### create adjacency matrices
-ams <- createAdjMat(vis_out)
-
-Md1 <- nd.centrality(ams, mode="Degree", directed = FALSE)
-Md2 <- nd.centrality(ams, mode="Close", directed = FALSE)
-Md3 <- nd.centrality(ams, mode="Between", directed = FALSE)
-Md4 <- nd.hamming(ams, out.dist = TRUE)
-Md5 <- nd.gdd(ams, out.dist = TRUE)
-Md6 <- nd.dsd(ams, out.dist = TRUE, type="Adj")
-
-Md1 <- as.matrix(Md1$D)
-Md2 <- as.matrix(Md2$D)
-Md3 <- as.matrix(Md3$D)
-Md4 <- as.matrix(Md4$D)
-Md5 <- as.matrix(Md5$D)
-Md6 <- as.matrix(Md6$D)
-
-Md_l1[[i]] <- Md1
-Md_l2[[i]] <- Md2
-Md_l3[[i]] <- Md3
-Md_l4[[i]] <- Md4
-Md_l5[[i]] <- Md5
-Md_l6[[i]] <- Md6
-
-print(i)
-}
-Md_fin1 <- Reduce("+", Md_l1)/length(Md_l1)
-#Md_fin2 <- Reduce("+", Md_l2)/length(Md_l2)
-Md_fin3 <- Reduce("+", Md_l3)/length(Md_l3)
-#Md_fin4 <- Reduce("+", Md_l4)/length(Md_l4)
-#Md_fin5 <- Reduce("+", Md_l5)/length(Md_l5)
-#Md_fin6 <- Reduce("+", Md_l6)/length(Md_l6)
-
-Md_plot <- Md_fin1
 
 Md_plot[upper.tri(Md_plot)] <- Inf
-nams0 <- c("PDD-NOS","AS","autism","control")
+nams0 <- c("Local_Diagnosis", "Local_Relapse", "Li_Diagnosis", "Li_Relapse")
 colnames(Md_plot) <- nams0 #gsub(" ","_",tolower(names(ams)))
 rownames(Md_plot) <- nams0 #gsub(" ","_",tolower(names(ams)))
 
@@ -107,7 +41,7 @@ Md_fin5_perm <- list()
 Md_fin6_perm <- list()
 
 #permutations
-for(j in 1:500){
+for(j in 1:100){
 Md_l1_perm <- list()
 #Md_l2_perm <- list()
 Md_l3_perm <- list()
@@ -118,7 +52,7 @@ Md_l3_perm <- list()
 set.seed(j)
 #newModel0[,3:8] <- newModel0[sample(1:length(newModel0$decision)),3:8] # need to try with only decision
 newModel0[,3] <- newModel0[sample(1:length(newModel0$decision)),3] 
-for(i in 1:20){
+for(i in 1:30){
   pddnos_n <- sample(which(as.character(newModel0$decision)=="PDD-NOS"), rls_min)
   asperg_n <- sample(which(as.character(newModel0$decision)=="ASPERGER'S DISORDER"), rls_min)
   autism_n <- sample(which(as.character(newModel0$decision)=="AUTISM"), rls_min)

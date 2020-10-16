@@ -1,9 +1,10 @@
-createAdjMat <- function(vis_out, opt="binary"){
-  
+VNtoAdjMat <- function(vis_out, opt="binary"){
+  #vis_out <- nets
   outs <- names(vis_out)
-  if(length(which(outs=="all"))!=0){
-    outs <- outs[-which(outs=="all")]
-  }
+  
+  #if(length(which(outs=="all"))!=0){
+  #  outs <- outs[-which(outs=="all")]
+  #}
 
   vis_out <- vis_out[outs]
   newLevs <- unique(c(as.character(unlist(lapply(vis_out, function(x) x$edges$from))), as.character(unlist(lapply(vis_out, function(x) x$edges$to)))))
